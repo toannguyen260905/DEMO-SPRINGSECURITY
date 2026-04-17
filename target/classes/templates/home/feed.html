@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Feed | SocialConnect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body class="app-body">
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a th:href="@{/}" class="nav-brand">
+            <span>🛡️</span> SocialConnect
+        </a>
+        <div class="nav-links">
+            <sec:authorize access="isAuthenticated()">
+                <a th:href="@{/home}" class="nav-link active">🏠 Feed</a>
+                <a th:href="@{/post/create}" class="nav-link">✏️ Đăng bài</a>
+                <a th:href="@{/auth/profile}" class="nav-link">👤 Profile</a>
+                <sec:authorize access="hasRole('ADMIN')">
+                    <a th:href="@{/admin/dashboard}" class="nav-link admin-badge">⚙️ Admin</a>
+                </sec:authorize>
+                <div class="nav-user">
+                    <span class="nav-email" sec:authentication="name"></span>
+                    <form th:action="@{/auth/logout}" method="post" style="display:inline">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Đăng xuất</button>
+                    </form>
+                </div>
+            </sec:authorize>
+        </div>
+    </div>
+</nav>
+
+<div class="feed-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar-left">
+        <div class="sidebar-card">
+            <div class="profile-quick">
+                <div class="profile-avatar-wrap">
+                    <img th:src="'https://api.dicebear.com/7.x/initials/svg?seed=' + ${#authentication.name}"
+                         class="profile-avatar" alt="Avatar">
+                    <div class="online-dot"></div>
+                </div>
+                <div class="profile-info">
+                    <h4 sec:authentication="name">User</h4>
+                    <!-- Hiển thị roles của user hiện tại -->
+                    <div class="role-tags">
+                        <sec:authorize access="hasRole('ADMIN')">
+                            <span class="role-tag admin">👑 ADMIN</span>
+                        </sec:authorize>
+                        <sec:authorize access="hasRole('USER')">
+                            <span class="role-tag user">👤 USER</span>
+                        </sec:authorize>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Status Box -->
+        <div class="sidebar-card security-status">
+            <h4>🛡️ Security Status</h4>
+            <div class="status-item">
+                <span class="status-dot green"></span>
+                <span>Authentication: Active</span>
+            </div>
+            <div class="status-item">
+                <span class="status-dot green"></span>
+                <span>CSRF: Protected</span>
+            </div>
+            <div class="status-item">
+                <span class="status-dot green"></span>
+                <span>Session: Valid</span>
+            </div>
+            <div class="security-principal">
+                <strong>Principal:</strong>
+                <code sec:authentication="name"></code>
+            </div>
+            <div class="security-principal">
+                <strong>Authorities:</strong>
+                <code sec:authentication="authorities"></code>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Feed -->
+    <main class="feed-main">
+        <!-- Flash messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Quick post box -->
+        <div class="quick-post-card">
+            <form th:action="@{/post/create}" method="get">
+                <div class="quick-post-input" onclick="window.location='/post/create'">
+                    <img th:src="'https://api.dicebear.com/7.x/initials/svg?seed=' + ${#authentication.name}"
+                         class="quick-avatar" alt="">
+                    <div class="quick-placeholder">Bạn đang nghĩ gì? ✏️</div>
+                </div>
+            </form>
+            <div class="quick-actions">
+                <a th:href="@{/post/create}" class="quick-action">📷 Ảnh</a>
+                <a th:href="@{/post/create}" class="quick-action">😊 Cảm xúc</a>
+                <a th:href="@{/post/create}" class="quick-action btn btn-primary btn-sm">✏️ Đăng bài</a>
+            </div>
+        </div>
+
+        <!-- Posts Feed -->
+        <div class="posts-container">
+            <div th:each="post : ${posts.content}" class="post-card" th:attr="data-post-id=${post.id}">
+                <div class="post-header">
+                    <img th:src="${post.author.avatarUrl != null ? post.author.avatarUrl : 'https://api.dicebear.com/7.x/initials/svg?seed=' + post.author.fullName}"
+                         class="post-avatar" alt="Avatar">
+                    <div class="post-meta">
+                        <span class="post-author" th:text="${post.author.fullName}">Author</span>
+                        <div class="post-roles">
+                            <th:block th:each="role : ${post.author.roles}">
+                                <span th:class="${role.name == 'ROLE_ADMIN' ? 'role-badge admin' : 'role-badge user'}"
+                                      th:text="${role.displayName}">Role</span>
+                            </th:block>
+                        </div>
+                        <span class="post-time" th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}">Time</span>
+                    </div>
+
+                    <!-- Admin có thể xóa bất kỳ bài nào -->
+                    <sec:authorize access="hasRole('ADMIN')">
+                        <form th:action="@{/admin/posts/{id}/delete(id=${post.id})}" method="post" style="margin-left:auto">
+                            <button type="submit" class="btn btn-xs btn-danger"
+                                    onclick="return confirm('Xóa bài viết này?')">🗑️</button>
+                        </form>
+                    </sec:authorize>
+                </div>
+
+                <div class="post-body">
+                    <p th:text="${post.content}" class="post-content">Content</p>
+                </div>
+
+                <div class="post-footer">
+                    <button class="post-action like-btn" th:attr="data-id=${post.id}">
+                        ❤️ <span th:text="${post.likesCount}">0</span>
+                    </button>
+                    <button class="post-action">💬 Bình luận</button>
+                    <button class="post-action">↗️ Chia sẻ</button>
+                </div>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${posts.content.isEmpty()}" class="empty-feed">
+                <p>😕 Chưa có bài viết nào. Hãy là người đầu tiên đăng bài!</p>
+                <a th:href="@{/post/create}" class="btn btn-primary">✏️ Đăng bài đầu tiên</a>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:href="@{/home(page=${currentPage - 1})}"
+               th:class="${currentPage == 0 ? 'page-btn disabled' : 'page-btn'}">← Trước</a>
+            <span class="page-info">Trang <th:block th:text="${currentPage + 1}"></th:block> / <th:block th:text="${totalPages}"></th:block></span>
+            <a th:href="@{/home(page=${currentPage + 1})}"
+               th:class="${currentPage >= totalPages - 1 ? 'page-btn disabled' : 'page-btn'}">Sau →</a>
+        </div>
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="sidebar-right">
+        <div class="sidebar-card">
+            <h4>🔐 Spring Security Demo</h4>
+            <div class="demo-tips">
+                <div class="tip-item">
+                    <strong>Thử vai trò Admin:</strong>
+                    <p>Đăng nhập bằng admin@social.com để thấy nút xóa bài và menu Admin</p>
+                </div>
+                <div class="tip-item">
+                    <strong>CSRF Token:</strong>
+                    <p>Mọi form POST đều có hidden field <code>_csrf</code></p>
+                </div>
+                <div class="tip-item">
+                    <strong>sec:authorize:</strong>
+                    <p>Thymeleaf ẩn/hiện element theo role của user</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký | SocialConnect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body class="auth-body">
+
+<div class="auth-container">
+    <!-- Left Panel -->
+    <div class="auth-left">
+        <div class="auth-left-content">
+            <div class="auth-brand">
+                <span class="brand-icon-xl">🛡️</span>
+                <h1>SocialConnect</h1>
+                <p>Tạo tài khoản và trải nghiệm bảo mật thực tế</p>
+            </div>
+
+            <div class="bcrypt-demo">
+                <h3>🔒 BCrypt Demo</h3>
+                <p>Khi bạn đăng ký, mật khẩu sẽ được hash:</p>
+                <div class="code-block">
+                    <div class="code-line">
+                        <span class="code-label">Input:</span>
+                        <code id="pwdPreview">mypassword123</code>
+                    </div>
+                    <div class="code-arrow">⬇️ BCryptPasswordEncoder.encode()</div>
+                    <div class="code-line">
+                        <span class="code-label">Hash:</span>
+                        <code class="hash-value">$2a$10$N9qo8u...</code>
+                    </div>
+                </div>
+                <p class="bcrypt-note">✅ Hash khác nhau mỗi lần (do salt)<br>
+                   ✅ Không thể giải mã ngược<br>
+                   ✅ Work factor = 10 (chậm brute-force)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel - Register Form -->
+    <div class="auth-right">
+        <div class="auth-form-card">
+            <div class="auth-form-header">
+                <h2>Tạo tài khoản mới 🚀</h2>
+                <p>Tham gia SocialConnect ngay hôm nay</p>
+            </div>
+
+            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+            <form th:action="@{/auth/register}" method="post" id="registerForm">
+                <!-- CSRF được Thymeleaf tự thêm -->
+
+                <div class="form-group">
+                    <label for="fullName" class="form-label">👤 Họ và tên</label>
+                    <input type="text" id="fullName" name="fullName"
+                           class="form-input" placeholder="Nguyễn Văn A"
+                           required minlength="2">
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">📧 Email</label>
+                    <input type="email" id="email" name="email"
+                           class="form-input" placeholder="your@email.com"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">🔑 Mật khẩu (ít nhất 6 ký tự)</label>
+                    <input type="password" id="password" name="password"
+                           class="form-input" placeholder="••••••••"
+                           required minlength="6"
+                           oninput="updateBcryptDemo(this.value)">
+                    <div class="password-strength" id="strengthBar">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <span class="strength-text" id="strengthText"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label">🔑 Xác nhận mật khẩu</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword"
+                           class="form-input" placeholder="••••••••"
+                           required onblur="checkPasswordMatch()">
+                    <span class="match-text" id="matchText"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full btn-lg" id="registerBtn">
+                    ✅ Tạo tài khoản
+                </button>
+            </form>
+
+            <div class="auth-divider"><span>hoặc</span></div>
+
+            <div class="auth-footer">
+                <p>Đã có tài khoản?
+                    <a th:href="@{/auth/login}" class="link-primary">Đăng nhập</a>
+                </p>
+            </div>
+
+            <div class="security-info-box">
+                <p>🔒 <strong>Mật khẩu của bạn</strong> được mã hóa bằng BCrypt
+                    ngay khi gửi đi. Chúng tôi không bao giờ lưu mật khẩu dạng plain text.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/main.js}"></script>
+<script>
+function updateBcryptDemo(password) {
+    document.getElementById('pwdPreview').textContent =
+        password.length > 0 ? password : 'mypassword123';
+    // Password strength
+    const strength = calculateStrength(password);
+    const fill = document.getElementById('strengthFill');
+    const text = document.getElementById('strengthText');
+    fill.style.width = strength.percent + '%';
+    fill.style.background = strength.color;
+    text.textContent = strength.label;
+    text.style.color = strength.color;
+}
+
+function calculateStrength(pwd) {
+    if (pwd.length === 0) return { percent: 0, color: '#e2e8f0', label: '' };
+    let score = 0;
+    if (pwd.length >= 6) score++;
+    if (pwd.length >= 10) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    const map = [
+        { percent: 20, color: '#ef4444', label: 'Rất yếu' },
+        { percent: 40, color: '#f97316', label: 'Yếu' },
+        { percent: 60, color: '#eab308', label: 'Trung bình' },
+        { percent: 80, color: '#22c55e', label: 'Mạnh' },
+        { percent: 100, color: '#10b981', label: 'Rất mạnh' },
+    ];
+    return map[Math.min(score - 1, 4)] || map[0];
+}
+
+function checkPasswordMatch() {
+    const p1 = document.getElementById('password').value;
+    const p2 = document.getElementById('confirmPassword').value;
+    const el = document.getElementById('matchText');
+    if (p2 === '') return;
+    if (p1 === p2) {
+        el.textContent = '✅ Mật khẩu khớp';
+        el.style.color = '#10b981';
+    } else {
+        el.textContent = '❌ Mật khẩu không khớp';
+        el.style.color = '#ef4444';
+    }
+}
+</script>
+</body>
+</html>

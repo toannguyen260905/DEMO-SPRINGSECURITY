@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>403 - Từ chối truy cập | SocialConnect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body class="auth-body" style="display:flex; align-items:center; justify-content:center;">
+
+<div style="text-align:center; max-width:500px; padding:48px;">
+    <div style="font-size:5rem; margin-bottom:16px;">🚫</div>
+    <h1 style="font-size:4rem; font-weight:900; background:linear-gradient(135deg,#ef4444,#f97316); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+        403
+    </h1>
+    <h2 style="margin-bottom:12px;">Từ chối truy cập</h2>
+    <p style="color:#94a3b8; margin-bottom:32px; line-height:1.7;">
+        🛡️ <strong>Spring Security</strong> đã chặn request này.<br>
+        Bạn không có quyền <code style="background:rgba(239,68,68,0.15); color:#fca5a5; padding:2px 8px; border-radius:4px;">ROLE_ADMIN</code> để truy cập trang này.
+    </p>
+
+    <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:20px; margin-bottom:28px; text-align:left; font-size:0.85rem; color:#94a3b8;">
+        <p><strong>Cơ chế hoạt động:</strong></p>
+        <p style="margin-top:8px;">SecurityConfig: <code>.requestMatchers("/admin/**").hasRole("ADMIN")</code></p>
+        <p>→ Spring Security phát hiện bạn không có ROLE_ADMIN</p>
+        <p>→ ExceptionTranslationFilter bắt AccessDeniedException</p>
+        <p>→ Trả về HTTP 403 Forbidden</p>
+    </div>
+
+    <div style="display:flex; gap:12px; justify-content:center;">
+        <a th:href="@{/home}" class="btn btn-primary">🏠 Về Feed</a>
+        <a th:href="@{/auth/login}" class="btn btn-outline">🔐 Đổi tài khoản</a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập | SocialConnect</title>
+    <meta name="description" content="Đăng nhập vào SocialConnect">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body class="auth-body">
+
+<div class="auth-container">
+    <!-- Left Panel - Info -->
+    <div class="auth-left">
+        <div class="auth-left-content">
+            <div class="auth-brand">
+                <span class="brand-icon-xl">🛡️</span>
+                <h1>SocialConnect</h1>
+                <p>Mạng xã hội được bảo vệ bởi Spring Security</p>
+            </div>
+
+            <div class="security-features">
+                <h3>🔒 Tính năng bảo mật</h3>
+                <div class="feature-item">
+                    <span class="feature-icon">🔑</span>
+                    <div>
+                        <strong>BCrypt Password Encoding</strong>
+                        <p>Mật khẩu được hash với độ phức tạp cao</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🎭</span>
+                    <div>
+                        <strong>Role-Based Authorization</strong>
+                        <p>ROLE_USER và ROLE_ADMIN với quyền khác nhau</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🛡️</span>
+                    <div>
+                        <strong>CSRF Protection</strong>
+                        <p>Tự động bảo vệ mọi form POST request</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🔄</span>
+                    <div>
+                        <strong>Remember Me</strong>
+                        <p>Cookie an toàn với thời hạn 7 ngày</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📊</span>
+                    <div>
+                        <strong>Session Management</strong>
+                        <p>Giới hạn 1 session đồng thời/user</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo accounts -->
+            <div class="demo-accounts">
+                <h3>🎮 Tài khoản demo</h3>
+                <div class="demo-account admin" onclick="fillLogin('admin@social.com', 'admin123')">
+                    <span class="demo-badge admin">ADMIN</span>
+                    <div>
+                        <strong>admin@social.com</strong>
+                        <span>admin123</span>
+                    </div>
+                </div>
+                <div class="demo-account user" onclick="fillLogin('user@social.com', 'user123')">
+                    <span class="demo-badge user">USER</span>
+                    <div>
+                        <strong>user@social.com</strong>
+                        <span>user123</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel - Login Form -->
+    <div class="auth-right">
+        <div class="auth-form-card">
+            <div class="auth-form-header">
+                <h2>Chào mừng trở lại! 👋</h2>
+                <p>Đăng nhập để tiếp tục</p>
+            </div>
+
+            <!-- Thông báo lỗi/thành công -->
+            <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+            <!--
+                🛡️ SPRING SECURITY FORM LOGIN
+                ==============================
+                action="/auth/do-login" → khớp với loginProcessingUrl trong SecurityConfig
+                Spring Security sẽ tự xử lý POST này,
+                KHÔNG cần controller method cho POST /auth/do-login
+
+                CSRF Token: Thymeleaf tự thêm hidden field _csrf
+                <input type="hidden" name="_csrf" value="...">
+            -->
+            <form th:action="@{/auth/do-login}" method="post" id="loginForm">
+
+                <div class="form-group">
+                    <label for="email" class="form-label">📧 Email</label>
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           class="form-input"
+                           placeholder="your@email.com"
+                           required
+                           autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">🔑 Mật khẩu</label>
+                    <div class="password-wrapper">
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               class="form-input"
+                               placeholder="••••••••"
+                               required>
+                        <button type="button" class="password-toggle" onclick="togglePassword()">👁️</button>
+                    </div>
+                </div>
+
+                <!--
+                    REMEMBER ME
+                    Tên "remember-me" khớp với rememberMeParameter trong SecurityConfig
+                -->
+                <div class="form-check">
+                    <input type="checkbox" id="remember-me" name="remember-me" class="form-checkbox">
+                    <label for="remember-me">Ghi nhớ đăng nhập (7 ngày)</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full btn-lg" id="loginBtn">
+                    🔐 Đăng nhập
+                </button>
+            </form>
+
+            <div class="auth-divider">
+                <span>hoặc</span>
+            </div>
+
+            <div class="auth-footer">
+                <p>Chưa có tài khoản?
+                    <a th:href="@{/auth/register}" class="link-primary">Đăng ký ngay</a>
+                </p>
+            </div>
+
+            <!-- Security Info Box -->
+            <div class="security-info-box">
+                <p>🛡️ <strong>Bảo mật:</strong> CSRF token được tự động đính kèm vào mọi form.
+                    Password được hash bằng BCrypt trước khi lưu DB.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/main.js}"></script>
+<script>
+function fillLogin(email, password) {
+    document.getElementById('email').value = email;
+    document.getElementById('password').value = password;
+    document.getElementById('loginForm').classList.add('form-filled');
+}
+
+function togglePassword() {
+    const pwd = document.getElementById('password');
+    pwd.type = pwd.type === 'password' ? 'text' : 'password';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | SocialConnect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body class="app-body admin-body">
+
+<!-- Admin Navbar -->
+<nav class="navbar admin-navbar">
+    <div class="nav-container">
+        <a th:href="@{/}" class="nav-brand">
+            <span>🛡️</span> SocialConnect <span class="admin-label">ADMIN</span>
+        </a>
+        <div class="nav-links">
+            <a th:href="@{/home}" class="nav-link">🏠 Feed</a>
+            <a th:href="@{/admin/dashboard}" class="nav-link active">📊 Dashboard</a>
+            <a th:href="@{/admin/users}" class="nav-link">👥 Users</a>
+            <a th:href="@{/h2-console}" target="_blank" class="nav-link">🗄️ H2 DB</a>
+            <div class="nav-user">
+                <span class="nav-email" sec:authentication="name"></span>
+                <form th:action="@{/auth/logout}" method="post" style="display:inline">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="admin-layout">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="admin-menu">
+            <h3 class="admin-menu-title">⚙️ Quản trị</h3>
+            <a th:href="@{/admin/dashboard}" class="admin-menu-item active">
+                📊 Dashboard
+            </a>
+            <a th:href="@{/admin/users}" class="admin-menu-item">
+                👥 Quản lý Users
+            </a>
+            <a th:href="@{/h2-console}" target="_blank" class="admin-menu-item">
+                🗄️ H2 Database Console
+            </a>
+            <hr class="admin-divider">
+            <a th:href="@{/home}" class="admin-menu-item">
+                🏠 Quay về Feed
+            </a>
+        </div>
+
+        <!-- Security Info -->
+        <div class="admin-security-card">
+            <h4>🛡️ Bảo vệ Admin</h4>
+            <p>Trang này được bảo vệ <strong>2 lớp</strong>:</p>
+            <ol>
+                <li><code>.hasRole("ADMIN")</code><br>trong SecurityConfig</li>
+                <li><code>@PreAuthorize</code><br>trên Controller</li>
+            </ol>
+            <p>User thường cố vào → <strong>403 Forbidden</strong></p>
+        </div>
+    </aside>
+
+    <!-- Admin Main Content -->
+    <main class="admin-main">
+        <div class="admin-header">
+            <h1>📊 Admin Dashboard</h1>
+            <p>Chào mừng, <span sec:authentication="name"></span>! Đây là tổng quan hệ thống.</p>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon users">👥</div>
+                <div class="stat-data">
+                    <span class="stat-number" th:text="${totalUsers}">0</span>
+                    <span class="stat-label">Tổng users</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon active">✅</div>
+                <div class="stat-data">
+                    <span class="stat-number" th:text="${activeUsers}">0</span>
+                    <span class="stat-label">Đang hoạt động</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon posts">📝</div>
+                <div class="stat-data">
+                    <span class="stat-number" th:text="${totalPosts}">0</span>
+                    <span class="stat-label">Bài viết</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon security">🛡️</div>
+                <div class="stat-data">
+                    <span class="stat-number">100%</span>
+                    <span class="stat-label">Bảo mật</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="admin-section">
+            <div class="section-header">
+                <h2>👥 Danh sách Users</h2>
+                <a th:href="@{/admin/users}" class="btn btn-sm btn-outline">Xem tất cả</a>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên</th>
+                            <th>Email</th>
+                            <th>Roles</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${recentUsers}">
+                            <td th:text="${user.id}">#</td>
+                            <td>
+                                <div class="table-user">
+                                    <img th:src="${user.avatarUrl != null ? user.avatarUrl : 'https://api.dicebear.com/7.x/initials/svg?seed=' + user.fullName}"
+                                         class="table-avatar" alt="">
+                                    <span th:text="${user.fullName}">Name</span>
+                                </div>
+                            </td>
+                            <td th:text="${user.email}">email</td>
+                            <td>
+                                <span th:each="role : ${user.roles}"
+                                      th:class="${role.name == 'ROLE_ADMIN' ? 'role-badge admin' : 'role-badge user'}"
+                                      th:text="${role.displayName}">Role</span>
+                            </td>
+                            <td>
+                                <span th:class="${user.accountNonLocked ? 'status-badge active' : 'status-badge locked'}"
+                                      th:text="${user.accountNonLocked ? '✅ Hoạt động' : '🔒 Bị khóa'}">Status</span>
+                            </td>
+                            <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy') : '-'}">Date</td>
+                            <td>
+                                <form th:action="@{/admin/users/{id}/toggle-lock(id=${user.id})}" method="post">
+                                    <button type="submit"
+                                            th:class="${user.accountNonLocked ? 'btn btn-xs btn-warning' : 'btn btn-xs btn-success'}"
+                                            th:text="${user.accountNonLocked ? '🔒 Khóa' : '🔓 Mở khóa'}">
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Posts Table -->
+        <div class="admin-section">
+            <div class="section-header">
+                <h2>📝 Bài viết gần đây</h2>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nội dung</th>
+                            <th>Tác giả</th>
+                            <th>Thời gian</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="post : ${recentPosts}">
+                            <td th:text="${post.id}">#</td>
+                            <td>
+                                <span th:text="${#strings.abbreviate(post.content, 80)}">Content</span>
+                            </td>
+                            <td th:text="${post.author.fullName}">Author</td>
+                            <td th:text="${#temporals.format(post.createdAt, 'dd/MM HH:mm')}">Time</td>
+                            <td>
+                                <form th:action="@{/admin/posts/{id}/delete(id=${post.id})}" method="post"
+                                      onsubmit="return confirm('Xóa bài viết này?')">
+                                    <button type="submit" class="btn btn-xs btn-danger">🗑️ Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Spring Security Architecture Box -->
+        <div class="admin-section">
+            <h2>🏗️ Spring Security Flow</h2>
+            <div class="security-flow">
+                <div class="flow-step">
+                    <div class="flow-num">1</div>
+                    <div class="flow-content">
+                        <strong>Request đến /admin/dashboard</strong>
+                        <p>Browser gửi request với session cookie</p>
+                    </div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step highlight">
+                    <div class="flow-num">2</div>
+                    <div class="flow-content">
+                        <strong>Security Filter Chain</strong>
+                        <p>Kiểm tra JSESSIONID → load Authentication</p>
+                    </div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step highlight">
+                    <div class="flow-num">3</div>
+                    <div class="flow-content">
+                        <strong>Authorization Check</strong>
+                        <p>hasRole('ADMIN')? → ✅ cho qua</p>
+                    </div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-num">4</div>
+                    <div class="flow-content">
+                        <strong>AdminController</strong>
+                        <p>Xử lý request, trả về View</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

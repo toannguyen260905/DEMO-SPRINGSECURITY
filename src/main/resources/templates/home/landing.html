@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialConnect - Mạng xã hội bảo mật với Spring Security</title>
+    <meta name="description" content="SocialConnect - Demo Spring Security MVC">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body class="landing-body">
+
+<!-- Navbar -->
+<nav class="navbar glass">
+    <div class="nav-container">
+        <a href="/" class="nav-brand">
+            <span>🛡️</span> SocialConnect
+        </a>
+        <div class="nav-links">
+            <div sec:authorize="isAuthenticated()">
+                <a th:href="@{/home}" class="btn btn-primary">Vào Feed →</a>
+            </div>
+            <div sec:authorize="isAnonymous()">
+                <a th:href="@{/auth/login}" class="btn btn-outline">Đăng nhập</a>
+                <a th:href="@{/auth/register}" class="btn btn-primary">Đăng ký miễn phí</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="hero-orb orb-1"></div>
+        <div class="hero-orb orb-2"></div>
+        <div class="hero-orb orb-3"></div>
+    </div>
+    <div class="hero-content">
+        <div class="hero-badge">🎓 Spring Security Demo — MVC Architecture</div>
+        <h1 class="hero-title">
+            Mạng xã hội được bảo vệ bởi
+            <span class="gradient-text">Spring Security</span>
+        </h1>
+        <p class="hero-subtitle">
+            Demo đầy đủ các tính năng bảo mật: Authentication, Authorization,
+            BCrypt, CSRF, Remember Me, Session Management và Method Security
+        </p>
+        <div class="hero-actions">
+            <a th:href="@{/auth/register}" class="btn btn-primary btn-xl">
+                🚀 Bắt đầu Demo →
+            </a>
+            <a th:href="@{/auth/login}" class="btn btn-glass btn-xl">
+                🔐 Đăng nhập
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Architecture Section -->
+<section class="architecture-section">
+    <div class="container">
+        <h2 class="section-title">🏗️ Kiến trúc MVC</h2>
+        <p class="section-subtitle">Spring Security hoạt động như một Filter Chain bao ngoài kiến trúc MVC</p>
+
+        <div class="arch-diagram">
+            <div class="arch-layer security-layer">
+                <div class="layer-label">🛡️ Spring Security Filter Chain</div>
+                <div class="arch-filters">
+                    <span class="filter-chip">UsernamePasswordAuthenticationFilter</span>
+                    <span class="filter-chip">AnonymousAuthenticationFilter</span>
+                    <span class="filter-chip">ExceptionTranslationFilter</span>
+                    <span class="filter-chip">FilterSecurityInterceptor</span>
+                </div>
+            </div>
+            <div class="arch-arrow">⬇️</div>
+            <div class="arch-mvc">
+                <div class="mvc-box controller">
+                    <div class="mvc-icon">🎮</div>
+                    <div class="mvc-label">Controller</div>
+                    <div class="mvc-detail">C trong MVC</div>
+                    <code>@Controller</code>
+                </div>
+                <div class="arch-arrow-h">⟺</div>
+                <div class="mvc-box service">
+                    <div class="mvc-icon">⚙️</div>
+                    <div class="mvc-label">Service</div>
+                    <div class="mvc-detail">Business Logic</div>
+                    <code>@PreAuthorize</code>
+                </div>
+                <div class="arch-arrow-h">⟺</div>
+                <div class="mvc-box repository">
+                    <div class="mvc-icon">🗄️</div>
+                    <div class="mvc-label">Repository</div>
+                    <div class="mvc-detail">Data Access</div>
+                    <code>JpaRepository</code>
+                </div>
+            </div>
+            <div class="arch-arrow">⬇️</div>
+            <div class="arch-view">
+                <div class="mvc-box view">
+                    <div class="mvc-icon">👁️</div>
+                    <div class="mvc-label">View (Thymeleaf)</div>
+                    <div class="mvc-detail">V trong MVC</div>
+                    <code>sec:authorize</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Grid -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="section-title">🔒 Tính năng Spring Security được demo</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-card-icon">🔑</div>
+                <h3>Authentication</h3>
+                <p>Form Login tùy chỉnh, CustomUserDetailsService load user từ DB theo email</p>
+                <code class="feature-code">loadUserByUsername()</code>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card-icon">🎭</div>
+                <h3>Authorization</h3>
+                <p>Role-based: ROLE_USER xem feed, ROLE_ADMIN quản lý toàn hệ thống</p>
+                <code class="feature-code">hasRole('ADMIN')</code>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card-icon">🔒</div>
+                <h3>BCrypt Password</h3>
+                <p>Mật khẩu được hash với salt ngẫu nhiên, không thể giải mã ngược</p>
+                <code class="feature-code">BCryptPasswordEncoder</code>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card-icon">🛡️</div>
+                <h3>CSRF Protection</h3>
+                <p>Token tự động được thêm vào mọi form, bảo vệ khỏi tấn công CSRF</p>
+                <code class="feature-code">_csrf token</code>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card-icon">🔄</div>
+                <h3>Remember Me</h3>
+                <p>Cookie an toàn với key bí mật, tự động đăng nhập trong 7 ngày</p>
+                <code class="feature-code">rememberMe()</code>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card-icon">⚡</div>
+                <h3>Method Security</h3>
+                <p>@PreAuthorize trực tiếp trên method của Service layer</p>
+                <code class="feature-code">@PreAuthorize</code>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="cta-content">
+        <h2>Sẵn sàng trải nghiệm?</h2>
+        <p>Dùng tài khoản demo để xem sự khác biệt giữa USER và ADMIN</p>
+        <div class="cta-accounts">
+            <a th:href="@{/auth/login}" class="cta-account admin">
+                <span class="cta-role">ADMIN</span>
+                <span>admin@social.com / admin123</span>
+            </a>
+            <a th:href="@{/auth/login}" class="cta-account user">
+                <span class="cta-role">USER</span>
+                <span>user@social.com / user123</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-inner">
+        <p>🛡️ <strong>SocialConnect</strong> — Demo Spring Security | MVC Architecture</p>
+        <p class="footer-tech">Spring Boot · Spring Security · Thymeleaf · H2 · JPA</p>
+    </div>
+</footer>
+
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
